@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
     res.send('Users Home Page');
 });
 
-router.get('/register', registerUser );
+router.post('/register', registerUser );
 
 router.post('/login', loginUser);
 

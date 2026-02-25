@@ -1,8 +1,8 @@
 const userModel = require('../models/user-model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const {genearteToken} = require('../utils/generateToken');
-
+const {generateToken} = require('../utils/generateToken');
+const productModel = require('../models/product-model');
 
 module.exports.registerUser = async (req, res) => {
     try{
@@ -22,7 +22,7 @@ module.exports.registerUser = async (req, res) => {
                     fullname
                     });
                     
-                    let token = genearteToken(user);
+                    let token = generateToken(user);
 
                     res.cookie("token", token);
                     res.send("User registered successfully");
@@ -42,13 +42,19 @@ module.exports.loginUser = async (req, res) => {
 
     if(!user) return res.send("User not found");
 
-    bcrypt.compare(password, user.password, function(err, result) {
+    bcrypt.compare(password, user.password, async function(err, result) {
         if(err) return res.send(err.message);
         else if(result) {
-            let token = genearteToken(user);
+            let token = generateToken(user);
             res.cookie("token", token);
-            res.send("User logged in successfully");
+            let products = await productModel.find();
+            res.render('shop',{products});
         }
         else return res.send("Invalid password");
     });
+}
+
+module.exports.logout = (req, res) => {
+    res.clearCookie("token");
+    res.redirect('/');
 }
